@@ -1,4 +1,4 @@
-Opp_id,Stage,Amount,Vertical,Product(s),Competitor
+Id,Stage,Amount,Vertical,Product(s),Competitor
 1001,Closed Won,"$59,730.00",SNF,"Learning, Assessments",MedTeach
 1002,Closed Won,"$11,975.00",HC,Learning,InsightsAct
 1003,Engage,"$34,757.00",AL,"Learning, Assessments",MedTeach
