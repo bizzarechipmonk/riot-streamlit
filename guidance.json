@@ -1,0 +1,40 @@
+{
+  "stage_guidance": {
+    "Identify": "Focus on uncovering core pain points, confirming buying triggers, and identifying key stakeholders.",
+    "Prove": "Demonstrate differentiated value with use cases, proof points, and measurable outcomes.",
+    "Engage": "Build multi-threaded relationships and align solution capabilities to specific stakeholder priorities.",
+    "Negotiate": "Reinforce ROI, reduce perceived implementation risk, and align on commercial terms.",
+    "Closed Won": "Prioritize onboarding success, executive visibility, and expansion planning.",
+    "Closed Lost": "Document competitive dynamics, identify gaps, and define re-engagement strategy."
+  },
+  "vertical_guidance": {
+    "SNF": "Emphasize survey readiness, CNA onboarding speed, compliance reporting, and multi-facility visibility.",
+    "AL": "Highlight caregiver training consistency, resident safety, and simplified policy acknowledgment.",
+    "HH": "Lead with mobile-first learning, distributed workforce tracking, and rapid onboarding for field staff.",
+    "HC": "Stress caregiver competency validation, compliance oversight, and retention-focused engagement tools."
+  },
+  "competitor_guidance": {
+    "MedTeach": "Differentiate on flexibility, broader workforce applicability, and implementation speed.",
+    "SNFCourse": "Differentiate on enterprise scalability, reporting depth, and cross-role coverage.",
+    "CareEd": "Lean into broader compliance depth and multi-setting support.",
+    "InsightsAct": "Position integrated learning and compliance capabilities beyond standalone engagement tools."
+  },
+  "icps": {
+    "SNF": [
+      "Regional skilled nursing operators",
+      "Multi-site SNF organizations facing survey pressure"
+    ],
+    "AL": [
+      "Mid-sized assisted living chains",
+      "Operators standardizing caregiver training across communities"
+    ],
+    "HH": [
+      "Multi-state home health agencies",
+      "Franchise-based home care organizations"
+    ],
+    "HC": [
+      "Non-medical home care providers",
+      "Rapidly scaling caregiver networks"
+    ]
+  }
+}
