@@ -1,90 +1,148 @@
 import streamlit as st
-import pandas as pd
-import json
 
-# -------------------------
-# Load Data
-# -------------------------
+from core.data import load_opps, load_guidance, find_opp, get_opp_context, find_similar_opps_by_amount_and_vertical
+from core.guidance import get_vertical_guidance, get_competitor_guidance, get_icps
+from core.formatting import format_currency
+from core.ai import get_client, generate_stage_questions
+
+st.set_page_config(page_title="RIOT", layout="wide")
+
+st.markdown("""
+<style>
+.card {
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    background-color: #ffffff;
+}
+</style>
+""", unsafe_allow_html=True)
 
 @st.cache_data
-def load_data():
-    opps = pd.read_csv("opportunities.csv", dtype=str).fillna("")
-    with open("guidance.json", "r") as f:
-        guidance = json.load(f)
+def load_cached():
+    opps = load_opps("opportunities.csv")
+    guidance = load_guidance("guidance.json")
     return opps, guidance
 
-opps, guidance = load_data()
+@st.cache_resource
+def load_client():
+    return get_client(st.secrets["OPENAI_API_KEY"])
 
-# -------------------------
-# App Title
-# -------------------------
+opps, guidance = load_cached()
+client = load_client()
 
 st.title("Reliably Informing Opportunities Tool (RIOT)")
 
-# -------------------------
-# Input
-# -------------------------
+opp_id = st.text_input("Enter Salesforce Opportunity ID (e.g., 7444)").strip()
 
-opp_id = st.text_input("Enter Salesforce Opportunity ID")
+# Find opportunity
+try:
+    opp_row = find_opp(opps, opp_id)
+except KeyError as e:
+    st.error(str(e))
+    st.stop()
 
-if opp_id:
+# Summary
+summary_container = st.container()
+with summary_container:
+    if opp_row is None and opp_id:
+        st.warning(f"No opportunity found for ID **{opp_id}**. Double-check the ID and try again.")
+    elif opp_row is not None:
+        ctx = get_opp_context(opp_row)
 
-    match = opps[opps["Id"] == opp_id]
+        st.markdown("### Opportunity Summary")
+        c1, c2, c3, c4, c5 = st.columns(5)
+        c1.metric("Account", ctx.account)
+        c2.metric("Amount", format_currency(ctx.amount))
+        c3.metric("Vertical", ctx.vertical or "—")
+        c4.metric("Stage", ctx.stage or "—")
+        c5.metric("Competitor", ctx.competitor or "—")
 
-    if match.empty:
-        st.error("Opportunity not found.")
+st.divider()
+
+if opp_row is None:
+    st.stop()
+
+# Context for the rest of the app
+ctx = get_opp_context(opp_row)
+
+col1, col2 = st.columns([3, 1])
+
+with col1:
+
+    # -------------------------
+    # Stage Questions
+    # -------------------------
+
+    
+    stage_label = ctx.stage if ctx.stage else "Current Stage"
+    st.subheader(f"Questions to Ask at {stage_label}")
+
+    if not ctx.stage or not ctx.vertical:
+        st.info("Missing Stage or Vertical on this opportunity, so I can’t generate stage questions yet.")
     else:
-        opp = match.iloc[0]
-
-        # Layout
-        col1, col2 = st.columns([2, 1])
-
-        # -------------------------
-        # Left Column
-        # -------------------------
-        with col1:
-
-            st.subheader("Stage Specific Guidance")
-            st.info(
-                guidance["stage_guidance"].get(
-                    opp["StageName"],
-                    "No guidance available."
+        with st.spinner("Generating buyer questions…"):
+            try:
+                ai = generate_stage_questions(
+                    client=client,
+                    amount=str(ctx.amount) if ctx.amount else "",
+                    stage=ctx.stage,
+                    vertical=ctx.vertical,
+                    competitor=ctx.competitor or "",
                 )
-            )
 
-            st.subheader("Vertical Specific Guidance")
-            st.info(
-                guidance["vertical_guidance"].get(
-                    opp["Vertical"],
-                    "No guidance available."
-                )
-            )
+                st.markdown("**Top questions**")
+                questions = "\n".join([f"- {q}" for q in ai.get("questions", [])])
+                st.markdown(questions)
 
-            st.subheader("Competitor Specific Guidance")
-            st.info(
-                guidance["competitor_guidance"].get(
-                    opp["Competitor"],
-                    "No guidance available."
-                )
-            )
+                st.markdown("**Red flags to listen for**")
+                red_flags = "\n".join([f"- {rf}" for rf in ai.get("red_flags", [])])
+                st.markdown(red_flags)
 
-        # -------------------------
-        # Right Column
-        # -------------------------
-        with col2:
+                st.markdown("**Recommended next steps**")
+                next_steps = "\n".join([f"- {ns}" for ns in ai.get("next_steps", [])])
+                st.markdown(next_steps)
 
-            st.subheader("Similar Opportunities")
+            except Exception as e:
+                st.error("AI generation failed. Check your API key / app logs.")
+                st.caption(str(e))
 
-            similar = opps[
-                (opps["Vertical"] == opp["Vertical"]) &
-                (opps["StageName"] == opp["StageName"]) &
-                (opps["Id"] != opp_id)
-            ]
+    # -------------------------
+    # Vertical Guidance
+    # -------------------------
 
-            st.write(similar.head(5)[["Id", "StageName", "Vertical"]])
+    vertical_label = ctx.vertical if ctx.vertical else "Vertical"
+    st.subheader(f"{vertical_label} Specific Guidance")
 
-            st.subheader("ICPs")
+    st.info(get_vertical_guidance(guidance, ctx.vertical))
 
-            icps = guidance["icps"].get(opp["Vertical"], [])
-            for icp in icps:
-                st.write("•", icp)
+    # -------------------------
+    # Competitor Guidance
+    # -------------------------
+
+    if ctx.competitor:
+        st.subheader(f"{ctx.competitor} Specific Guidance")
+        st.info(get_competitor_guidance(guidance, ctx.competitor))
+    else:
+        st.subheader("Competitor-Specific Guidance")
+        st.info("No competitor listed for this opportunity.")
+
+with col2:
+    st.subheader("Similar Opportunities")
+
+    similar = find_similar_opps_by_amount_and_vertical(
+        opps,
+        opp_id=opp_id,
+        vertical=ctx.vertical,
+        amount=ctx.amount,
+        n=5,
+        pct_band=0.15,   # tweak as you like (0.15 tighter, 0.40 looser)
+        min_floor=10000,
+    )
+
+    st.dataframe(similar, use_container_width=True, hide_index=True)
+
+    st.subheader("ICPs")
+    for icp in get_icps(guidance, ctx.vertical):
+        st.write("•", icp)
