@@ -9,6 +9,7 @@ class DealContext:
     account: str
     stage: str
     vertical: str
+    product: str
 
     # Optional / nullable fields
     amount: Optional[float] = None

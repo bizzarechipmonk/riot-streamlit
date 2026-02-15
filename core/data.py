@@ -73,6 +73,8 @@ def get_opp_context(opp_row):
     owner = pick(opp_row, ["Owner", "OwnerName"])
     close_date = pick(opp_row, ["CloseDate", "Close Date"])
     region = pick(opp_row, ["Region", "Territory"])
+    product = pick(opp_row, ["Product", "PrimaryProduct", "Primary Product"])
+    
 
     # Convert amount to float safely
     amount = None
@@ -98,6 +100,7 @@ def get_opp_context(opp_row):
         owner=owner or None,
         close_date=close_date or None,
         region=region or None,
+        product=product or None,
     )
 
 def find_similar_opps_by_amount_and_vertical(

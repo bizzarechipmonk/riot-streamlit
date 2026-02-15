@@ -1,7 +1,3 @@
-Love it. Let’s make this feel like a legit internal product, not just “Jacob’s side script.” Here’s a clean, professional README you can drop straight into `README.md`.
-
----
-
 # RIOT – Sales Enablement Streamlit App
 
 RIOT (Rep Intelligence Opportunity Tool) is a Streamlit-based sales enablement application that delivers **vertical-, stage-, and competitor-specific guidance** to sales reps based on a Salesforce Opportunity ID.
@@ -20,6 +16,8 @@ When a rep enters an **Opportunity ID**, the app:
    * Sales Stage
    * Vertical
    * Competitor
+   * Product
+   
 3. Matches those attributes against `guidance.json`
 4. Returns tailored:
 

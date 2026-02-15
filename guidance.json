@@ -7,6 +7,17 @@
     "Closed Won": "Prioritize onboarding success, executive visibility, and expansion planning.",
     "Closed Lost": "Document competitive dynamics, identify gaps, and define re-engagement strategy."
   },
+  "product_guidance": {
+    "Learning": "A scalable learning management solution designed to deliver, track, and optimize workforce training across roles and locations. Supports structured onboarding, continuing education, and performance development with reporting and analytics to drive measurable outcomes.",
+    "Learning, Assessments": "An integrated learning and competency solution that pairs structured training with validated assessments. Ensures knowledge transfer is reinforced through testing, skills validation, and gap analysis to improve readiness and performance.",
+    "Policy Management": "A centralized platform for authoring, distributing, tracking, and auditing organizational policies and procedures. Enables version control, attestation tracking, and alignment with regulatory requirements to reduce risk and ensure accountability.",
+    "Learning, Policy Management": "A unified workforce enablement platform combining structured training delivery with policy governance. Ensures employees not only complete required education but also acknowledge and adhere to current policies, strengthening compliance and operational consistency.",
+    "XM": "An experience management solution that captures and analyzes workforce or stakeholder feedback to uncover sentiment, engagement trends, and improvement opportunities. Translates insights into actionable strategies that drive retention, satisfaction, and organizational performance.",
+    "Compliance, XM": "A compliance and experience intelligence solution that blends regulatory oversight with real-time feedback insights. Enables organizations to identify risk signals, monitor culture and engagement trends, and proactively address compliance vulnerabilities.",
+    "Learning, Regulation Management": "A training and regulatory alignment platform that connects workforce education directly to evolving regulatory standards. Automatically maps training requirements to applicable regulations, reducing manual oversight and improving audit readiness.",
+    "Learning, Regulation Management, Compliance, XM": "A comprehensive workforce intelligence suite that unifies training delivery, regulatory alignment, compliance oversight, and experience analytics. Provides leaders with a holistic view of performance, risk, and engagement to drive strategic, data-informed decisions.",
+    "Learning, XM": "A combined learning and experience solution that integrates training delivery with continuous feedback insights. Enables organizations to measure training effectiveness, understand learner sentiment, and refine workforce development strategies in real time."
+},
   "vertical_guidance": {
     "SNF": "Emphasize survey readiness, CNA onboarding speed, compliance reporting, and multi-facility visibility.",
     "AL": "Highlight caregiver training consistency, resident safety, and simplified policy acknowledgment.",
@@ -19,22 +30,26 @@
     "CareEd": "Lean into broader compliance depth and multi-setting support.",
     "InsightsAct": "Position integrated learning and compliance capabilities beyond standalone engagement tools."
   },
-  "icps": {
+  "mkting": {
     "SNF": [
-      "Regional skilled nursing operators",
-      "Multi-site SNF organizations facing survey pressure"
+      "ICP: Regional skilled nursing operator",
+      "Webinar: How a top 10 SNF chain uses ACME to onboard 1000+ CNAs annually",
+      "Success Story: How ACME helped a SNF operator reduce survey citations by 25% in 6 months"
     ],
     "AL": [
-      "Mid-sized assisted living chains",
-      "Operators standardizing caregiver training across communities"
+      "ICP: Mid-sized assisted living chain",
+      "Webinar: How a leading AL operator reduced falls by 20% with ACME's training platform",
+      "Success Story: How ACME enabled a large AL provider to achieve 95% policy acknowledgment compliance across 15 communities"
     ],
     "HH": [
-      "Multi-state home health agencies",
-      "Small mom and pop home health organizations"
+      "ICP: Multi-state home health agencies",
+      "Webinar: How a large HH provider accelerated caregiver onboarding by 30% with ACME",
+      "Success Story: How ACME's mobile learning platform helped a HH agency improve caregiver competency tracking and reduce compliance risks"
     ],
     "HC": [
-      "Franchised home care providers",
-      "Rapidly scaling caregiver networks"
+      "ICP: Franchised home care providers",
+      "Webinar: How a national home care franchise improved caregiver competency tracking with ACME",
+      "Success Story: How ACME's integrated learning and compliance platform helped a home care provider reduce caregiver turnover by 15%"
     ]
   }
 }

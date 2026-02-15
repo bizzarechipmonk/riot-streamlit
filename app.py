@@ -1,9 +1,9 @@
 import streamlit as st
 
 from core.data import load_opps, load_guidance, find_opp, get_opp_context, find_similar_opps_by_amount_and_vertical
-from core.guidance import get_vertical_guidance, get_competitor_guidance, get_icps
+from core.guidance import get_vertical_guidance, get_competitor_guidance, get_product_guidance, get_mkting
 from core.formatting import format_currency
-from core.ai import get_client, generate_stage_questions
+from core.ai import get_client, generate_stage_questions, generate_market_guidance
 
 st.set_page_config(page_title="RIOT", layout="wide")
 
@@ -34,7 +34,7 @@ client = load_client()
 
 st.title("Reliably Informing Opportunities Tool (RIOT)")
 
-opp_id = st.text_input("Enter Salesforce Opportunity ID (e.g., 7444)").strip()
+opp_id = st.text_input("Enter Salesforce Opportunity ID (e.g., 7465)").strip()
 
 # Find opportunity
 try:
@@ -55,7 +55,7 @@ with summary_container:
         c1, c2, c3, c4, c5 = st.columns(5)
         c1.metric("Account", ctx.account)
         c2.metric("Amount", format_currency(ctx.amount))
-        c3.metric("Vertical", ctx.vertical or "—")
+        c3.metric("Product", ctx.product or "—")
         c4.metric("Stage", ctx.stage or "—")
         c5.metric("Competitor", ctx.competitor or "—")
 
@@ -96,13 +96,9 @@ with col1:
                 questions = "\n".join([f"- {q}" for q in ai.get("questions", [])])
                 st.markdown(questions)
 
-                st.markdown("**Red flags to listen for**")
+                st.markdown("**One red flag to listen for**")
                 red_flags = "\n".join([f"- {rf}" for rf in ai.get("red_flags", [])])
                 st.markdown(red_flags)
-
-                st.markdown("**Recommended next steps**")
-                next_steps = "\n".join([f"- {ns}" for ns in ai.get("next_steps", [])])
-                st.markdown(next_steps)
 
             except Exception as e:
                 st.error("AI generation failed. Check your API key / app logs.")
@@ -115,7 +111,26 @@ with col1:
     vertical_label = ctx.vertical if ctx.vertical else "Vertical"
     st.subheader(f"{vertical_label} Specific Guidance")
 
-    st.info(get_vertical_guidance(guidance, ctx.vertical))
+    if not ctx.stage or not ctx.vertical:
+        st.info("Missing Stage or Vertical on this opportunity, so I can’t generate vertical insights yet.")
+    else:
+        with st.spinner("Generating vertical insights…"):
+            try:
+                ai = generate_market_guidance(
+                    client=client,
+                    amount=str(ctx.amount) if ctx.amount else "",
+                    stage=ctx.stage,
+                    vertical=ctx.vertical,
+                    competitor=ctx.competitor or "",
+                )
+
+                st.markdown("**Market Insights**")
+                insights = "\n".join([f"- {i}" for i in ai.get("insights", [])])
+                st.markdown(insights)
+
+            except Exception as e:
+                st.error("AI generation failed. Check your API key / app logs.")
+                st.caption(str(e))
 
     # -------------------------
     # Competitor Guidance
@@ -127,6 +142,17 @@ with col1:
     else:
         st.subheader("Competitor-Specific Guidance")
         st.info("No competitor listed for this opportunity.")
+
+    # -------------------------
+    # Product Guidance
+    # -------------------------
+
+    if ctx.product:
+        st.subheader(f"{ctx.product} Specific Guidance")
+        st.info(get_product_guidance(guidance, ctx.product))
+    else:
+        st.subheader("Product-Specific Guidance")
+        st.info("No product listed for this opportunity.")
 
 with col2:
     st.subheader("Similar Opportunities")
@@ -143,6 +169,6 @@ with col2:
 
     st.dataframe(similar, use_container_width=True, hide_index=True)
 
-    st.subheader("ICPs")
-    for icp in get_icps(guidance, ctx.vertical):
-        st.write("•", icp)
+    st.subheader("Marketing Insights")
+    for mkting in get_mkting(guidance, ctx.vertical):
+        st.write("•", mkting)
