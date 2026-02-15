@@ -1,9 +1,9 @@
 import streamlit as st
 
 from core.data import load_opps, load_guidance, find_opp, get_opp_context, find_similar_opps_by_amount_and_vertical
-from core.guidance import get_vertical_guidance, get_competitor_guidance, get_product_guidance, get_mkting
+from core.guidance import get_vertical_guidance, get_competitor_guidance, get_product_guidance, get_mkting, load_battlecard
 from core.formatting import format_currency
-from core.ai import get_client, generate_stage_questions, generate_market_guidance
+from core.ai import get_client, generate_stage_questions, generate_market_guidance, generate_competitor_guidance
 
 st.set_page_config(page_title="RIOT", layout="wide")
 
@@ -77,7 +77,7 @@ with col1:
 
     
     stage_label = ctx.stage if ctx.stage else "Current Stage"
-    st.subheader(f"Questions to Ask at {stage_label}")
+    st.subheader(f"Things to note at {stage_label} stage")
 
     if not ctx.stage or not ctx.vertical:
         st.info("Missing Stage or Vertical on this opportunity, so I can’t generate stage questions yet.")
@@ -136,16 +136,41 @@ with col1:
     # Competitor Guidance
     # -------------------------
 
-    if ctx.competitor:
-        st.subheader(f"{ctx.competitor} Specific Guidance")
-        st.info(get_competitor_guidance(guidance, ctx.competitor))
+
+
+    battlecard_md = load_battlecard(ctx.competitor)
+    
+    competitor_label = ctx.competitor if ctx.competitor else "Competitor"
+    st.subheader(f"{competitor_label} Specific Guidance")
+
+    if not ctx.stage or not ctx.competitor:
+        st.info("Missing Stage or Competitor on this opportunity, so I can’t generate competitor insights yet.")
     else:
-        st.subheader("Competitor-Specific Guidance")
-        st.info("No competitor listed for this opportunity.")
+        with st.spinner("Generating competitor insights…"):
+            try:
+                ai = generate_competitor_guidance(
+                    client=client,
+                    amount=str(ctx.amount) if ctx.amount else "",
+                    stage=ctx.stage or "",
+                    vertical=ctx.vertical or "",
+                    product=ctx.product or "",
+                    competitor=ctx.competitor or "",
+                    battlecard_md=battlecard_md,
+                )
+
+                st.markdown("**Compete Tips**")
+                insights = "\n".join([f"- {i}" for i in ai.get("insights", [])])
+                st.markdown(insights)
+
+            except Exception as e:
+                st.error("AI generation failed. Check your API key / app logs.")
+                st.caption(str(e))
 
     # -------------------------
     # Product Guidance
     # -------------------------
+
+
 
     if ctx.product:
         st.subheader(f"{ctx.product} Specific Guidance")

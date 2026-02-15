@@ -88,3 +88,49 @@ Return ONLY valid JSON. No markdown. No extra commentary. Return JSON with keys:
     )
     text = (resp.output_text or "").strip()
     return json.loads(text)
+
+
+def generate_competitor_guidance(
+    client: OpenAI,
+    amount: str,
+    stage: str,
+    vertical: str,
+    product: str = "",
+    competitor: str = "",
+    battlecard_md: str = "",
+    model: str = "gpt-4.1-mini",
+) -> Dict:
+    instructions = (
+         "You are a world-class B2B sales enablement expert and deal coach. "
+        "Use ONLY the provided battlecard for competitor facts and positioning. "
+        "If the battlecard doesn't cover something, say 'Not covered in battlecard' rather than guessing."
+    )
+
+    user_input = f"""
+ORANGE Opportunity context:
+- Amount: {amount}
+- Stage: {stage}
+- Vertical: {vertical} - HH stands for Home Health, HC stands for Home Care (non clinical), SNF stands for Skilled Nursing Facility, and ALF stands for Assisted Living Facility.
+- Competitor: {competitor or "Unknown/none listed"}
+- Product: {product or "Unknown/none listed"}
+
+Internal competitive intel (battlecard):
+{battlecard_md if battlecard_md else "No battlecard provided."}
+
+Task:
+Using the battlecard above, give the 3 most important insights for this rep right now.
+Each insight must be concrete and actionable (what to say / ask / do next).
+Do not invent facts not present in the battlecard.
+
+Return ONLY valid JSON. No markdown. No extra commentary. Return JSON with keys:
+- insights (array of strings)
+""".strip()
+
+    resp = client.responses.create(
+        model=model,
+        instructions=instructions,
+        input=user_input,
+        temperature=0.3,
+    )
+    text = (resp.output_text or "").strip()
+    return json.loads(text)
